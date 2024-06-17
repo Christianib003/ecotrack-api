@@ -37,7 +37,7 @@ class CollectionRequests(MethodView):
         jwt = get_jwt()
         if jwt.get("role") == "admin":
             return CollectionRequestModel.query.all()
-        elif jwt.get("role") == "household":
+        elif jwt.get("role") in ("household", "collector"):
             return CollectionRequestModel.query.filter_by(
                 household_id=jwt.get("sub")).all()
 
