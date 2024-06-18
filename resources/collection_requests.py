@@ -9,6 +9,9 @@ from flask_jwt_extended import jwt_required, get_jwt
 
 from db import db
 from models import CollectionRequestModel
+from models import HouseholdModel
+from models import CollectorModel
+from models import CollectionDateModel
 from schemas import CollectionRequestSchema
 
 
@@ -37,9 +40,24 @@ class CollectionRequests(MethodView):
         jwt = get_jwt()
         if jwt.get("role") == "admin":
             return CollectionRequestModel.query.all()
-        elif jwt.get("role") in ("household", "collector"):
+
+        elif jwt.get("role") == "household":
+            household_id = HouseholdModel.query.filter_by(
+                user_id=jwt.get("sub")).first().id
             return CollectionRequestModel.query.filter_by(
-                household_id=jwt.get("sub")).all()
+                household_id=household_id).all()
+        elif jwt.get("role") == "collector":
+            collector_id = CollectorModel.query.filter_by(
+                user_id=jwt.get("sub")).first().id
+
+            collector_dates = CollectionDateModel.query.filter_by(
+                collector_id=collector_id).all()
+            
+            collector_dates_ids = [date.id for date in collector_dates]
+
+            return CollectionRequestModel.query.filter(
+                CollectionRequestModel.collection_date_id.in_(
+                    collector_dates_ids)).all()
 
         abort(
             403,
@@ -71,7 +89,13 @@ class CollectionRequests(MethodView):
                 message="Household privileges required to access resources"
                 )
 
-        collection_request = CollectionRequestModel(**collection_request_data)
+        household_id = HouseholdModel.query.filter_by(
+            user_id=jwt.get("sub")).first().id
+
+        collection_request = CollectionRequestModel(
+            **collection_request_data,
+            household_id=household_id
+            )
         try:
             db.session.add(collection_request)
             db.session.commit()

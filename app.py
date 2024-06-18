@@ -60,8 +60,8 @@ def create_app(db_url=None):
 
     app.config["JWT_SECRET_KEY"] = "not-so-secret"
 
-    with app.app_context():
-        db.create_all()
+    # with app.app_context():
+    #     db.create_all()
 
     # Register the blueprints
     api.register_blueprint(UserBlp)

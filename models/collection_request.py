@@ -31,6 +31,10 @@ class CollectionRequestModel(db.Model):
         db.String(80),
         nullable=False
         )
+    amount = db.Column(
+        db.Float,
+        nullable=False
+    )
     household_id = db.Column(
         db.Integer,
         db.ForeignKey("households.id"),

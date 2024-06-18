@@ -52,8 +52,7 @@ class PlainCollectionRequestSchema(Schema):
     """
     id = fields.Int(dump_only=True)
     status = fields.Str(missing="pending")
-    household_id = fields.Str(required=True)
-    collection_date_id = fields.Int(required=True)
+    amount = fields.Float(required=True)
 
 
 class UserSchema(PlainUserSchema):
@@ -76,7 +75,6 @@ class CollectionRequestSchema(PlainCollectionRequestSchema):
     """
     This schema represents a collection request with relationships.
     """
-    household_id = fields.Int(required=True, load_only=True)
     collection_date_id = fields.Int(required=True, load_only=True)
     household = fields.Nested(PlainHouseholdSchema(), dump_only=True)
     collection_date = fields.Nested(
