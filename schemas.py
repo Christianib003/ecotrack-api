@@ -43,7 +43,7 @@ class PlainCollectionDateSchema(Schema):
     This schema represents a collection date.
     """
     id = fields.Int(dump_only=True)
-    date = fields.Date(required=True)
+    collection_date = fields.Date(required=True)
 
 
 class PlainCollectionRequestSchema(Schema):

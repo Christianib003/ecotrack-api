@@ -71,7 +71,10 @@ class CollectionDates(MethodView):
                 message="Collector privilege required to add collection dates"
                 )
 
-        collection_date = CollectionDateModel(**collection_date_data)
+        collection_date = CollectionDateModel(
+            **collection_date_data,
+            collector_id=jwt.get("sub")
+        )
 
         try:
             db.session.add(collection_date)
