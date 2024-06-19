@@ -1,7 +1,7 @@
 """
 Blueprint for handling collection requests
 """
-
+from flask import request
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from sqlalchemy.exc import SQLAlchemyError
@@ -13,6 +13,7 @@ from models import HouseholdModel
 from models import CollectorModel
 from models import CollectionDateModel
 from schemas import CollectionRequestSchema
+from schemas import PlainUpdateCollectionRequestSchema
 
 
 blp = Blueprint(
@@ -130,6 +131,42 @@ class CollectionRequest(MethodView):
             not exist
         """
         return CollectionRequestModel.query.get_or_404(collection_request_id)
+
+    @jwt_required()
+    @blp.response(200, PlainUpdateCollectionRequestSchema)
+    def patch(self, collection_request_id):
+        """
+        Update a collection request by ID
+
+        Args:
+            collection_request_id (str): The ID of the collection request
+            to update
+
+        Returns:
+            dict: A dictionary containing the updated collection request
+
+        Raises:
+            NotFound: If the collection request with the given ID does
+            not exist
+        """
+        jwt = get_jwt()
+        if jwt.get("role") != "household":
+            abort(
+                403,
+                message="Household privilege required to do this action"
+                )
+
+        data = request.get_json()
+        new_status = data.get("status")
+        if new_status not in ["pending", "completed"]:
+            abort(400, message="Invalid status")
+
+        collection_request = CollectionRequestModel.query.get_or_404(
+            collection_request_id)
+        collection_request.status = new_status
+
+        db.session.commit()
+        return collection_request
 
     @jwt_required()
     def delete(self, collection_request_id):

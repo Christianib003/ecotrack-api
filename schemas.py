@@ -55,6 +55,14 @@ class PlainCollectionRequestSchema(Schema):
     amount = fields.Float(required=True)
 
 
+class PlainUpdateCollectionRequestSchema(Schema):
+    """
+    This schema represents a collection request.
+    """
+    status = fields.Str()
+    amount = fields.Float()
+
+
 class UserSchema(PlainUserSchema):
     """
     This schema represents a user with relationships.
