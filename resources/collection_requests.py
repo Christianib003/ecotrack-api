@@ -197,3 +197,38 @@ class CollectionRequest(MethodView):
         db.session.delete(collection_request)
         db.session.commit()
         return {"message": "Collection request deleted successfully."}
+
+
+@blp.route("/collection_dates/<collection_date_id>/collection_requests")
+class CollectionRequestsByDate(MethodView):
+    """
+    Class for handling requests to the
+    /collection_dates/<collection_date_id>/collection_requests endpoint
+    """
+    @jwt_required()
+    @blp.response(200, CollectionRequestSchema(many=True))
+    def get(self, collection_date_id):
+        """
+        Get all collection requests by collection date ID
+
+        Args:
+            collection_date_id (str): The ID of the collection date
+
+        Returns:
+            dict: A dictionary containing all collection requests by the
+            given collection date ID
+
+        Raises:
+            NotFound: If the collection date with the given ID does not exist
+        """
+
+        jwt = get_jwt()
+
+        if jwt.get("role")  in ["admin", "collector"]:
+            return CollectionRequestModel.query.filter_by(
+                collection_date_id=collection_date_id).all()
+
+        abort(
+            403,
+            message="Admin/collector privileges required to access resources"
+            )
